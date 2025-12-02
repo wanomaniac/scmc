@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "com.skellybuilds.SCMC.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "ServerLoginNetworkHandlerAccessor"
   ],

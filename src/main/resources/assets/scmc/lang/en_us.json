@@ -6,7 +6,7 @@
   "scmc.console.initalize": "%s \n \n Starting up SCMC \n \n Mod is running on version %s",
 
   "scmc.config.desc.useonlyuniversalmods": "Universal mods basically are both client side & server side mods. So one for both! \n  If you leave this enabled, server mods will not be used unless you specified otherwise",
-  "scmc.config.desc.cankickplayerswithnomods": "This gives you the choice to allow the mod to kick players if they are missing a mod or otherwise \n  If you choose false, it won't kick the player but notify the player about the missing mods so they can be aware!",
+  "scmc.config.desc.cankickplayerswithnomods": "This gives you the choice to allow the mod to kick players if they are missing a mod or otherwise \n  If you choose false, it won't kick the player but notify the player about the missing mods so they can be aware! (Note: this will be bypassed if the configuration has enforce_same_mods enabled or disllowed_mods is not empty with the player having a disallowed mod!)",
   "scmc.config.desc.usethismodsonly": "This is an array that will only use the mod ids provided for the mod, nothing else. \n  If you leave it empty, All mods will be used by SCMC unless you configurated it otherwise",
   "scmc.config.desc.dontusethismods": "This will basically blacklist a mod from being registered in SCMC, if you have it usethismods, the blacklist won't be checked since the whitelist is always checked first.",
   "scmc.config.desc.usethismods": "This is basically an exception, which ignores everything and registers anyways, sort of like a whitelist",
@@ -14,5 +14,8 @@
   "scmc.config.desc.enablescmccrashes": "When something goes critically wrong on sCMC's end, you can change if SCMC can stop your server & make a crash report.",
   "scmc.config.desc.port": "Which port should this mod use for SCMC to Server Mod Menu communication - Changing the port means you require a domain for port compatibility for SCMC, learn how to do this at https://github.com/SkellyBuilds/scmc/wiki/Getting-started-using-SCMC#how-do-i-use-different-ports-properly",
   "scmc.config.desc.canreadmodtranslations": "If a mod tells SCMC via it's fabric config to read it's texts (Like description, links, names etc) and use it instead. If you are an mod developer, here's how you can integrete it in your mod. https://github.com/SkellyBuilds/scmc/wiki/Integreting-SCMC-to-your-fabric-mod",
-  "scmc.config.desc.translatebydefault": "Translate the mod's details anyways even if the mod doesn't add it in it's configuration."
+  "scmc.config.desc.translatebydefault": "Translate the mod's details anyways even if the mod doesn't add it in it's configuration.",
+  "scmc.config.desc.enforcesamemods": "Enforce that all players must have the SAME exact mods that the server is giving. Meaning that players CANNOT add any other mods than the ones the server is giving. Enforce this if this is some really special server with high stakes although servermodmenu isn't exactly secure.",
+  "scmc.config.desc.disallowedmods": "A list of mods that are not allowed to be used on this server. This is useful for servers that have a lot of mods that are not allowed to be used on them or preventing cheating. This doesn't fully circumvent cheating though.",
+  "scmc.config.desc.announcedisallowedmods": "If you want to humiliate a player for attempting to use disallowed mods in front of the entire server, you can set this to true and it will notify everyone about the player whom attempted to use disallowed mods."
 }

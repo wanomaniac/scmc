@@ -24,10 +24,9 @@
 			"com.skellybuilds.SCMC.SCMC"
 		]
 	},
-	"depends": {
-		"fabricloader": ">=0.15.11",
-		"minecraft": "~1.20.1",
-		"java": ">=17",
-		"fabric-api": "*"
-	}
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.21 <1.22",
+    "fabric-api": "*"
+  }
 }
