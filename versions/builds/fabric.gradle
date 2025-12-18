@@ -1,0 +1,20 @@
+def mcVersion = project.property("minecraft_version") // e.g., "1.21.7"
+def versionsDir = file("${project.rootDir}/versions")
+
+def matchingFolders = versionsDir.listFiles()?.findAll { dir ->
+    dir.isDirectory() && VersionUtil.versionMatches(dir.name, mcVersion)
+} ?: []
+
+if (matchingFolders.isEmpty()) {
+    throw new GradleException("No matching version folder found for ${mcVersion}")
+}
+
+def selectedVersionDir = matchingFolders[0] // pick the first match
+println "[Fabric] Building for ${minecraft_version} using folder ${selectedVersionDir.name}"
+
+ext.version_number = selectedVersionDir.name
+
+sourceSets.main {
+    java.srcDirs += ["${selectedVersionDir}/fabric/java"]
+    resources.srcDirs += ["${selectedVersionDir}/fabric/resources"]
+}

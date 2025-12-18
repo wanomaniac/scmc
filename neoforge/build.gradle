@@ -1,0 +1,101 @@
+buildscript {
+    dependencies {
+        classpath("com.modrinth.minotaur:com.modrinth.minotaur.gradle.plugin:2.8.10")
+    }
+}
+
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev' version '2.+'
+}
+base {
+    archivesName = "${mod_id}-neoforge[${VersionUtil.getDirectory(project.rootDir.toString(), project.minecraft_version).getName()}]"
+}
+
+if (neoforge_version == null) {
+    project.tasks.configureEach { enabled = false }
+    println "Skipping NeoForge project as version isn't supported"
+    return
+}
+
+
+apply from: file("${project.rootDir}/versions/builds/neoforge.gradle")
+
+neoForge {
+    version = neoforge_version
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
+    runs {
+        configureEach {
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+        }
+        client {
+            client()
+        }
+//        data {
+////            clientData()
+//
+//            // DataGen can be run by - "./gradlew :neoforge:runData" in Terminal.
+//            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+//            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+//        }
+        server {
+            server()
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// Implement mcgradleconventions loader attribute
+def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations.named("$variant") {
+        attributes {
+            attribute(loaderAttribute, 'neoforge')
+        }
+    }
+}
+
+
+
+sourceSets.configureEach {
+    [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName, it.getTaskName(null, 'jarJar')].each { variant->
+        configurations.named("$variant") {
+            attributes {
+                attribute(loaderAttribute, 'neoforge')
+            }
+        }
+    }
+}
+
+tasks.withType(Javadoc).configureEach {
+    enabled = false
+}
+
+
+apply plugin: "com.modrinth.minotaur"
+
+modrinth {
+    token       = project.modrinthTOKEN
+    projectId   = project.modrinthID     // numeric ID or slug
+    versionNumber = project.version.toString()     // or manually set
+    versionName   = project.mod_name.toString()+" "+project.version.toString()     // optional
+    changelog     = file(rootDir.toString()+"/CHANGELOG.md").text       // or a string
+    loaders       = ["neoforge"]
+    gameVersions  = project.minecraft_version_range.toList()
+    uploadFile    = tasks.named("jar")
+}

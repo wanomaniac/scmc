@@ -1,0 +1,56 @@
+def mcVersion = project.property("minecraft_version") // e.g., "1.21.7"
+def versionsDir = file("${project.rootDir}/versions")
+
+def matchingFolders = versionsDir.listFiles()?.findAll { dir ->
+    dir.isDirectory() && VersionUtil.versionMatches(dir.name, mcVersion)
+} ?: []
+
+if (matchingFolders.isEmpty()) {
+    throw new GradleException("No matching version folder found for ${mcVersion}! This is a developer error, implement a folder for this.")
+}
+
+def selectedVersionDir = matchingFolders[0] // pick the first match
+println "[Common] Building for ${minecraft_version} using folder ${selectedVersionDir.name}"
+
+ext.version_number = selectedVersionDir.name
+
+def mergedSourceDir = file("$buildDir/mergedSources")
+
+tasks.register("mergeSources") {
+    doLast {
+        // Clear previous contents
+        mergedSourceDir.deleteDir()
+        mergedSourceDir.mkdirs()
+
+        copy {
+            from "${selectedVersionDir}/common/java"
+            into "${mergedSourceDir}/java"
+        }
+
+        // Copy new sources
+        copy {
+            from "${project.rootDir}/common/src/main/java"
+            into "${mergedSourceDir}/java"
+        }
+
+        // Copy resources if needed
+        copy {
+            from "${selectedVersionDir}/common/resources"
+            into "${mergedSourceDir}/resources"
+        }
+        copy {
+            from "${project.rootDir}/common/src/main/resources"
+            into "${mergedSourceDir}/resources"
+        }
+    }
+}
+
+sourceSets {
+    common {
+        java.srcDirs = ["${project.rootDir}/common/src/main/java", "${selectedVersionDir}/common/java"]
+        resources.srcDirs = ["${project.rootDir}/common/src/main/resources", "${selectedVersionDir}/common/resources"]
+
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}

@@ -1,5 +1,6 @@
-# Welcome to  SCMC  0.9.4.2
+# Welcome to  SCMC  1.4
 Server Client Mod Checker
+New and fresh, with support for forge and neoforge!
 
 A simple fabric mod that communicates with server mod menu so that your members can download mods
 
