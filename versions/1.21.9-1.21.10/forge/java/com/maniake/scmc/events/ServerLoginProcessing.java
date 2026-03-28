@@ -4,14 +4,24 @@ import com.maniake.scmc.Constants;
 import com.maniake.scmc.config.ModMenuConfig;
 import com.maniake.scmc.db.PlayerMods;
 import com.maniake.scmc.utils.Mods;
+import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.network.GatherLoginConfigurationTasksEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +34,10 @@ import static com.maniake.scmc.Commons.PLAYERS;
 import static com.maniake.scmc.SCMC.server;
 
 public class ServerLoginProcessing {
-    public static void onEventRegister(Player player){
-        ServerPlayer serverPlayer = (ServerPlayer)player;
-        String username = serverPlayer.connection.getOwner().name();
-
+    private static void disconnectPlayer(Connection connection, Component message){
+        connection.send(new ClientboundDisconnectPacket(message));
+    }
+    public static void onEventRegister(String username, Connection connection ){
         if(PLAYERS.get(username) != null){
             com.maniake.scmc.db.Player playerDB = PLAYERS.get(username);
             if(!Objects.equals(playerDB.gameVersion, SharedConstants.getCurrentVersion().id())){
@@ -36,7 +46,7 @@ public class ServerLoginProcessing {
 
                 message.append(Component.literal("Your game version is out of date!\n\n").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_RED));
                 message.append(Component.literal("Please update your game to version "+SharedConstants.getCurrentVersion().name()+" to join this server!").withStyle(ChatFormatting.WHITE));
-                ((ServerPlayer) player).connection.disconnect(message);
+                disconnectPlayer(connection, message);
                 return;
             }
             if(!Objects.equals(playerDB.protocal, SharedConstants.getProtocolVersion())){
@@ -45,7 +55,7 @@ public class ServerLoginProcessing {
 
                 message.append(Component.literal("Your game's internal protocal is out of date!\n").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_RED));
                 message.append(Component.literal("Please update your game to a version that supports protocal "+SharedConstants.getProtocolVersion()+" to join this server!").withStyle(ChatFormatting.WHITE));
-                serverPlayer.connection.disconnect(message);
+                disconnectPlayer(connection, message);
                 return;
             }
             if(!Objects.equals(playerDB.modLoader, PLATFORM.getPlatformName())){
@@ -71,7 +81,7 @@ public class ServerLoginProcessing {
                         Component.literal("Please switch to " + PLATFORM.getPlatformName() + " to play on this server.")
                                 .withStyle(ChatFormatting.WHITE)
                 );
-                serverPlayer.connection.disconnect(message);
+                disconnectPlayer(connection, message);
                 return;
             }
             Mods md = new Mods();
@@ -131,7 +141,7 @@ public class ServerLoginProcessing {
                     msg.append(Component.literal("Please update/install these mods and restart your game.")
                             .withStyle(ChatFormatting.WHITE));
 
-                    serverPlayer.connection.disconnect(msg);
+                    disconnectPlayer(connection, msg);
                 }
             }
 
@@ -156,7 +166,7 @@ public class ServerLoginProcessing {
                 msg.append("\nRemove these mods and restart your game.")
                         .withStyle(ChatFormatting.WHITE);
 
-                serverPlayer.connection.disconnect(msg);
+                disconnectPlayer(connection, msg);
 
                 if(ModMenuConfig.ANNONCEDISALLOWEDMODS.getValue()){
                     MutableComponent announcementMsg = Component.literal(username+" has attempted to join the server with disallowed mods installed!\n The mods are: \n\n")
@@ -204,11 +214,11 @@ public class ServerLoginProcessing {
                             .withStyle(ChatFormatting.WHITE);
 
 
-                    serverPlayer.connection.disconnect(msg);
+                    disconnectPlayer(connection, msg);
                 }
             }
         } else {
-            serverPlayer.connection.disconnect(Component.literal("You require the latest version of servermodmenu to join this server! Please install that mod to your client or update it if you have it already"));
+            disconnectPlayer(connection, Component.literal("You require the latest version of servermodmenu to join this server! Please install that mod to your client or update it if you have it already"));
         }
     }
 }

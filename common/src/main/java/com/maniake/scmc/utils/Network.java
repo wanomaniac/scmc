@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -165,7 +166,7 @@ public class Network {
                 }
 
             } catch (Exception e) {
-                if(Objects.equals(e.getMessage(), " java.net.SocketException: Connection reset")) return;
+                if(e instanceof SocketException) return;
                 LoggerFactory.getLogger("SCMC [Server Client Mods Checker]").error("Client disconnected or error occurred", e);
             } finally {
                 try { socket.close(); } catch (Exception ignored) {}

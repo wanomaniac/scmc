@@ -1,1 +1,1 @@
-Ready for the latest release for SMM with many changes related to backend apis and changes that SMM needed
+Updated Forge and Neoforge to deliver SCMC disconnect messages before the player loads the world as that could crash the entire server if the mod doesn't do the job and loads invalid mods.
