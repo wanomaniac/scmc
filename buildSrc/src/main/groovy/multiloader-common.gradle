@@ -15,6 +15,12 @@ java {
 }
 
 repositories {
+    maven { // MacOS FIX for lwjgl
+        url "https://libraries.minecraft.net"
+        content {
+            includeModule("org.lwjgl", "lwjgl-freetype")
+        }
+    }
     mavenCentral()
     // https://docs.gradle.org/current/userguide/declaring_repositories.html#declaring_content_exclusively_found_in_one_repository
     exclusiveContent {
@@ -83,6 +89,7 @@ jar {
     }
 }
 
+modrinthTOKEN = System.getenv('mToken')
 processResources {
     var expandProps = [
             'version'                      : version,

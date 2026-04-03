@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-        classpath "fabric-loom:fabric-loom.gradle.plugin:1.11-SNAPSHOT"
+        classpath "fabric-loom:fabric-loom.gradle.plugin:1.13-SNAPSHOT"
     }
 }
 
@@ -99,4 +99,5 @@ modrinth {
     loaders       = ["fabric"]
     gameVersions  = project.minecraft_version_range.toList()
     uploadFile    = tasks.named("remapJar")
+    versionType  = project.modrinthStatus
 }
